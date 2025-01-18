@@ -29,9 +29,10 @@ public class Client {
         ByteArrayOutputStream serverWriter = new ByteArrayOutputStream();
         ObjectOutputStream objectOutputStream = new ObjectOutputStream(serverWriter);
         objectOutputStream.writeObject(requestToServer);
+        Console.println("Sending: " + requestToServer);
         byte[] bytes;
         bytes = serverWriter.toByteArray();
-        ByteBuffer buffer = ByteBuffer.allocate(100000);
+        ByteBuffer buffer = ByteBuffer.allocate(8192);
         buffer.put(bytes);
         buffer.flip();
         InetSocketAddress address = new InetSocketAddress(host, port);
@@ -39,9 +40,9 @@ public class Client {
     }
 
     public Response receiveResponse() throws IOException, ClassNotFoundException, InterruptedException {
-        ByteBuffer receiveBuffer = ByteBuffer.allocate(100000);
+        ByteBuffer receiveBuffer = ByteBuffer.allocate(8192);
 
-        long timeout = 5000;
+        long timeout = 10000;
         long start = System.currentTimeMillis();
         while (datagramChannel.receive(receiveBuffer) == null && System.currentTimeMillis() - start < timeout) {
             Thread.sleep(100);
@@ -59,6 +60,7 @@ public class Client {
 
         ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream);
         Object deserializedObject = objectInputStream.readObject();
+        Console.println("Deserialized: " + deserializedObject);
         return (Response) deserializedObject;
     }
 
@@ -74,7 +76,7 @@ public class Client {
                         scriptControl.handle(null, user);
                 if (requestToServer == null) return false;
                 if (requestToServer.isEmpty()) continue;
-                ByteBuffer buffer = ByteBuffer.allocate(1000000);
+                ByteBuffer buffer = ByteBuffer.allocate(8192);
                 DatagramChannel datagramChannel;
                 InetSocketAddress serverAddress = new InetSocketAddress(host, port);
                 try {
@@ -104,6 +106,7 @@ public class Client {
                 ByteArrayInputStream bais = new ByteArrayInputStream(responseData);
                 ObjectInputStream ois = new ObjectInputStream(bais);
                 serverResponse = (Response) ois.readObject();
+
                 Console.println(serverResponse.getResponse());
             } catch (InvalidClassException | NotSerializableException exception) {
                 JOptionPane.showMessageDialog(null, "DataSendingException");
@@ -120,7 +123,7 @@ public class Client {
         Response serverResponse = null;
         String command;
 
-        ByteBuffer buffer = ByteBuffer.allocate(1000000);
+        ByteBuffer buffer = ByteBuffer.allocate(8192);
         InetSocketAddress serverAddress = new InetSocketAddress(host, port);
 
 

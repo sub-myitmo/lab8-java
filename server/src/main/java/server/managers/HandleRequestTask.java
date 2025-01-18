@@ -27,6 +27,7 @@ public class HandleRequestTask implements Callable<Response> {
     @Override
     public Response call() {
         ArrayList<String> array = commandManager.getNewCommands();
+
         User user = new User(
                 request.getUser().getUsername(),
                 request.getUser().getPassword()
@@ -34,13 +35,15 @@ public class HandleRequestTask implements Callable<Response> {
         ResponseCode responseCode = executeCommand(request.getName(), request.getStringArgument(),
                 request.getOtherArguments(), user);
 
+        //logger.info("Выполняется в потоке cachedPool1: " + Thread.currentThread()); ;
+
         if (array.contains(request.getName())){
-            logger.info("Новый Response сформирован");
-            System.out.println(newObject.toString());
+            // logger.info("Отвечаем на базовый запрос коллекции");
+
             return new Response(newObject, ResponseCode.PEAK_SIZE);
 
-        }else{
-            logger.info("Старый Response сформирован");
+        } else{
+            logger.info("Response сформирован в ответ на: '" + request.getName() + "'");
 
             return new Response(responseCode, ResponseManager.getAndClear(), ResponseManager.getArgsAndClear());
         }

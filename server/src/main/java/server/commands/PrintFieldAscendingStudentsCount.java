@@ -43,7 +43,7 @@ public class PrintFieldAscendingStudentsCount extends Command {
                 collectionManager.getStackCollection().stream()
                         .map(StudyGroup::getStudentsCount)
                         .sorted()
-                        .forEach(count -> ResponseManager.append("- " + count));
+                        .forEach(count -> ResponseManager.appendln("- " + count));
 
             }
             return true;

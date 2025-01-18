@@ -1,6 +1,7 @@
 package client.gui;
 
 import client.Client;
+import common.actions.GroupMask;
 import common.actions.Request;
 import common.models.StudyGroup;
 
@@ -13,6 +14,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Stack;
+
 import client.helpers.CommunicationControl;
 
 class CirclesPanel extends JPanel {
@@ -46,7 +48,7 @@ class CirclesPanel extends JPanel {
             @Override
             public void mouseClicked(MouseEvent e) {
                 super.mouseClicked(e);
-                for (AnimatedCircle circle : circles.keySet()){
+                for (AnimatedCircle circle : circles.keySet()) {
                     int x = e.getX();
                     int y = e.getY();
                     int distance = (int) Math.sqrt(Math.pow(x - circle.x, 2) + Math.pow(y - circle.y, 2));
@@ -57,17 +59,24 @@ class CirclesPanel extends JPanel {
                         if (studyGroup != null) {
                             EditStudyGroup editStudyGroup = new EditStudyGroup(communicationControl);
                             editStudyGroup.setInfo(studyGroup);
-                            if (client.getCurrentUser().equals(studyGroup.getOwner())){
+                            if (client.getCurrentUser().equals(studyGroup.getOwner())) {
+                                editStudyGroup.addSave(true);
                                 JButton saveButton;
                                 saveButton = editStudyGroup.getSaveButton();
                                 saveButton.addActionListener(e1 -> {
                                     try {
-                                        client.sendRequest(new Request("update_by_id", String.valueOf(studyGroup.getId()), editStudyGroup.update(), client.getCurrentUser()));
-                                    } catch (IOException ex) {
+                                        GroupMask updateMask = editStudyGroup.update();
+                                        if (updateMask != null) {
+                                            client.sendRequest(new Request("update_by_id", String.valueOf(studyGroup.getId()), editStudyGroup.update(), client.getCurrentUser()));
+                                            client.receiveResponse();
+                                            editStudyGroup.dispose();
+                                        }
+                                    } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                                         throw new RuntimeException(ex);
                                     }
                                 });
-                            } else{
+                            } else {
+                                editStudyGroup.addSave(false);
                                 editStudyGroup.setNonEditable();
                             }
 
@@ -78,7 +87,7 @@ class CirclesPanel extends JPanel {
             }
         });
 
-        MouseAdapter ma = new MouseAdapter(){
+        MouseAdapter ma = new MouseAdapter() {
 
             private Point origin;
 
@@ -115,7 +124,7 @@ class CirclesPanel extends JPanel {
     }
 
     private StudyGroup findStudyGroupByID(long id) {
-        for (Stack<StudyGroup> stackOfGroup : listOfStacks){
+        for (Stack<StudyGroup> stackOfGroup : listOfStacks) {
             for (StudyGroup studyGroup : stackOfGroup) {
                 if (studyGroup.getId() == id) {
                     return studyGroup;
@@ -135,6 +144,8 @@ class CirclesPanel extends JPanel {
             g2d.setColor(colors[circle.colorIndex]);
             g2d.fillOval(circle.x - circle.radius, (int) circle.y - circle.radius, 2 * circle.radius, 2 * circle.radius);
             g2d.setColor(Color.BLACK);
+            g2d.setStroke(new BasicStroke(3));
+            g2d.drawOval(circle.x - circle.radius, (int) circle.y - circle.radius, 2 * circle.radius, 2 * circle.radius);
 
 
             FontMetrics metrics = g.getFontMetrics(g.getFont());

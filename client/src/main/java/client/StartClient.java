@@ -14,16 +14,16 @@ import javax.swing.*;
 
 public class StartClient {
     private static String host = "localhost";
-    public static int port;
+    public static int port = 8081;
 
     private Client client;
 
     public static void main(String[] args) {
         try {
             StartClient runClientInstance = new StartClient();
-            port = Integer.parseInt(args[0]);
+            //port = Integer.parseInt(args[0]);
             runClientInstance.client = new Client(host, port);
-            System.out.println("Соединение выполнено, хост = " + host);
+            System.out.println("Соединение выполнено, хост = " + host+ ":"+port);
 
             int delay = 1; // Задержка в секундах
             AtomicBoolean timerFinished = new AtomicBoolean(false);

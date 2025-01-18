@@ -147,7 +147,7 @@ public class CollectionManager {
      */
     public void shuffle() {
         Collections.shuffle(stackCollection);
-        Console.println(stackCollection.toString());
+        //Console.println(stackCollection.toString());
     }
 
 

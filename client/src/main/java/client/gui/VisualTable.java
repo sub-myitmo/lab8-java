@@ -52,7 +52,7 @@ public class VisualTable extends JFrame {
         getContentPane().add(scrollPane, BorderLayout.WEST);
 
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setSize(1200, 1200);
+        setSize(800, 800);
 
 
         JButton openMainFrameButton = new JButton(messages.getString("openDataTable"));
@@ -76,7 +76,7 @@ public class VisualTable extends JFrame {
         getContentPane().add(mainPanel);
 
         // таймер на 2 секунды
-        Timer timer = new Timer(2000, new ActionListener() {
+        Timer timer = new Timer(3000, new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 updateData(MainWindow.getStudyGroups());
@@ -124,10 +124,7 @@ public class VisualTable extends JFrame {
             circles.put(new AnimatedCircle(originalX, originalY, (int) radius, colorIndex, studyGroup.getName()), studyGroup.getId());
         }
 
-        // После обновления данных в таблице и списка кругов, нужно вызвать repaint для обновления GUI
         repaint();
-
-
     }
 
 

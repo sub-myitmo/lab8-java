@@ -17,7 +17,7 @@ public class EditStudyGroup extends JFrame {
     private JButton saveButton;
     private CommunicationControl communicationControl;
     private ResourceBundle messages = ResourceBundle.getBundle("client.gui.gui", UserSettings.getInstance().getSelectedLocale());
-
+    private JPanel panel;
 
     public EditStudyGroup(CommunicationControl communicationControl) {
         this.communicationControl = communicationControl;
@@ -27,7 +27,7 @@ public class EditStudyGroup extends JFrame {
                 messages.getString("birthday"), messages.getString("weight"), messages.getString("locX"), messages.getString("locY"),
                 messages.getString("locZ")};
 
-        JPanel panel = new JPanel();
+        panel = new JPanel();
         panel.setLayout(new GridLayout(16, 2));
 
         for (int i = 0; i < fieldNames.length; i++) {
@@ -38,11 +38,11 @@ public class EditStudyGroup extends JFrame {
             }
             if (i == 8) {
                 labels.add(i, label);
-                String[] commands = Semester.getNames();
-                JComboBox<String> commandList = new JComboBox<>(commands);
-                boxes.add(0, commandList);
+                String[] numSemester = Semester.getNames();
+                JComboBox<String> nums = new JComboBox<>(numSemester);
+                boxes.add(0, nums);
                 panel.add(label);
-                panel.add(commandList);
+                panel.add(nums);
             } else {
                 if (i>8){fields.add(i-1, field);}
                 else {fields.add(i, field);}
@@ -52,11 +52,14 @@ public class EditStudyGroup extends JFrame {
             }
         }
 
-        saveButton = new JButton(messages.getString("save"));
-        panel.add(saveButton);
+    }
+
+    public void addSave(boolean flag){
+        if (flag) {
+            saveButton = new JButton(messages.getString("save"));
+            panel.add(saveButton);
+        }
         add(panel);
-
-
         // Other JFrame setup code
         setTitle("Study group");
         setVisible(true);
@@ -64,8 +67,8 @@ public class EditStudyGroup extends JFrame {
         pack();
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null); // Центрируем окно
-
     }
+
 
     private void addLabelAndField(JPanel panel, JLabel label, JTextField field) {
         panel.add(label);
@@ -149,10 +152,17 @@ public class EditStudyGroup extends JFrame {
         Person person = communicationControl.setPerson(fields.get(8).getText(),
                 fields.get(9).getText(), fields.get(10).getText(), location);
 
-        GroupMask mask = new GroupMask(newName, coordinates,
-                newStudentsCount, newExpelledStudents, newTransferredStudents, newSemester, person);
+        if (newName == null || coordinates == null || newStudentsCount == null || newExpelledStudents == null || newTransferredStudents == null || newSemester == null || location == null || person == null) {
+            return null;
+        }
+        else {
+            GroupMask mask = new GroupMask(newName, coordinates,
+                    newStudentsCount, newExpelledStudents, newTransferredStudents, newSemester, person);
 
-        return mask;
+            return mask;
+        }
+
+
     }
 
     public JButton getSaveButton() {

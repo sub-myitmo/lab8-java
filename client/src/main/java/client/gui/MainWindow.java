@@ -4,6 +4,7 @@ import client.Client;
 import client.StartClient;
 import client.helpers.CommunicationControl;
 import common.actions.Console;
+import common.actions.GroupMask;
 import common.actions.Request;
 import common.actions.Response;
 import common.models.StudyGroup;
@@ -43,7 +44,7 @@ public class MainWindow extends JFrame {
 
     public MainWindow(Client client, CommunicationControl communicationControl) {
         setTitle(messages.getString("mainWindow"));
-        setSize(1200, 700);
+        setSize(1200, 800);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setVisible(true);
         setLocationRelativeTo(null);
@@ -134,22 +135,29 @@ public class MainWindow extends JFrame {
                         editStudyGroup.setInfo(studyGroup);
                         if (!studyGroup.getOwner().equals(client.getCurrentUser())) {
                             editStudyGroup.setNonEditable();
+                            editStudyGroup.addSave(false);
                         } else {
                             editStudyGroup.setEditable();
-                        }
-                        saveButton = editStudyGroup.getSaveButton();
+                            editStudyGroup.addSave(true);
 
-                        saveButton.addActionListener(e1 -> {
-                            try {
-                                System.out.println(studyGroup.getId());
-                                client.sendRequest(new Request("update_by_id", String.valueOf(studyGroup.getId()), editStudyGroup.update(), client.getCurrentUser()));
-                                Response res = client.receiveResponse();
-                                System.out.println(res.getResponse() + " " + res.getIsGoodResponse());
-                                editStudyGroup.dispose();
-                            } catch (IOException | ClassNotFoundException | InterruptedException ex) {
-                                throw new RuntimeException(ex);
-                            }
-                        });
+                            saveButton = editStudyGroup.getSaveButton();
+
+                            saveButton.addActionListener(e1 -> {
+                                try {
+                                    GroupMask updateMask = editStudyGroup.update();
+                                    if (updateMask != null) {
+                                        System.out.println(studyGroup.getId());
+                                        client.sendRequest(new Request("update_by_id", String.valueOf(studyGroup.getId()), editStudyGroup.update(), client.getCurrentUser()));
+                                        Response res = client.receiveResponse();
+                                        System.out.println(res.getResponse() + " " + res.getIsGoodResponse());
+                                        editStudyGroup.dispose();
+                                    }
+                                } catch (IOException | ClassNotFoundException | InterruptedException ex) {
+                                    throw new RuntimeException(ex);
+                                }
+                            });
+                        }
+
                         actionBool = true;
                     } else {
                         System.out.println();
@@ -171,9 +179,11 @@ public class MainWindow extends JFrame {
                         Response response = client.receiveResponse();
                         if (response != null) {
                             try {
+                                Console.println("size: " + response.getResponseObject());
                                 int count = (Integer) response.getResponseObject();
                                 for (int i = 0; i < count; i++) {
                                     Response tempResponse = client.receiveResponse();
+                                    Console.println(tempResponse.getResponseObject()+"");
                                     if (tempResponse != null) {
                                         listOfStackStudyGroup.add((Stack<StudyGroup>) tempResponse.getResponseObject());
                                     }
@@ -218,7 +228,7 @@ public class MainWindow extends JFrame {
                     }
                 });
             }
-        }, 0, 2, TimeUnit.SECONDS);
+        }, 0, 3, TimeUnit.SECONDS);
 
 
         JScrollPane scrollPane = new JScrollPane(table);
@@ -247,15 +257,18 @@ public class MainWindow extends JFrame {
                         actionBool = false;
 
                         EditStudyGroup addStudyGroup = new EditStudyGroup(communicationControl);
+                        addStudyGroup.addSave(true);
                         saveButton = addStudyGroup.getSaveButton();
                         saveButton.addActionListener(e1 -> {
                             try {
-                                client.sendRequest(new Request("add", "", addStudyGroup.update(), client.getCurrentUser()));
-                                client.receiveResponse();
+                                GroupMask updateMask = addStudyGroup.update();
+                                if (updateMask != null) {
+                                    client.sendRequest(new Request("add", "", updateMask, client.getCurrentUser()));
+                                    client.receiveResponse();
+                                    addStudyGroup.dispose();
+                                }
                             } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                                 throw new RuntimeException(ex);
-                            } finally {
-                                addStudyGroup.dispose();
                             }
 
                         });
@@ -277,7 +290,6 @@ public class MainWindow extends JFrame {
                         if (response4 == null) {
                             JOptionPane.showMessageDialog(null, "Данные утеряны или сервер недоступен, повторите попытку позже!");
                         } else {
-
                             JOptionPane.showMessageDialog(null, response4.getResponse());
                         }
                         actionBool = true;
@@ -295,35 +307,35 @@ public class MainWindow extends JFrame {
                             //do {
                             response1 = client.receiveResponse();
 
-
                             //} while (Objects.equals(response1, null));
                         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                             throw new RuntimeException(ex);
                         }
+                        actionBool = true;
                         if (response1 == null) {
                             JOptionPane.showMessageDialog(null, "Данные утеряны или сервер недоступен, повторите попытку позже!");
                         } else {
                             System.out.println(response1.getResponse() + " " + response1.getIsGoodResponse());
-                            System.out.println(response1.getResponse());
                             JOptionPane.showMessageDialog(null, response1.getResponse());
                         }
-                        actionBool = false;
+                        //actionBool = true;
                         break;
                     case "print_field_ascending_students_count":
                         actionBool = false;
                         try {
                             client.sendRequest(new Request("print_field_ascending_students_count", "", null, client.getCurrentUser()));
                             Response response = client.receiveResponse();
+                            actionBool = true;
                             if (response == null) {
                                 JOptionPane.showMessageDialog(null, "Данные утеряны или сервер недоступен, повторите попытку позже!");
                             } else {
-                                System.out.println(response.getResponse());
+                                //System.out.println(response.getResponse());
                                 JOptionPane.showMessageDialog(null, response.getResponse());
                             }
                         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                             throw new RuntimeException(ex);
                         }
-                        actionBool = true;
+                        //actionBool = true;
                         break;
                     case "print_ascending":
                         actionBool = false;
@@ -342,6 +354,7 @@ public class MainWindow extends JFrame {
                         try {
                             client.sendRequest(new Request("shuffle", "", null, client.getCurrentUser()));
                             Response response = client.receiveResponse();
+                            actionBool = true;
                             if (response == null) {
                                 JOptionPane.showMessageDialog(null, "Данные утеряны или сервер недоступен, повторите попытку позже!");
                             } else {
@@ -351,13 +364,14 @@ public class MainWindow extends JFrame {
                         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                             throw new RuntimeException(ex);
                         }
-                        actionBool = true;
+                        //actionBool = true;
                         break;
                     case "reorder":
                         actionBool = false;
                         try {
                             client.sendRequest(new Request("reorder", "", null, client.getCurrentUser()));
                             Response response = client.receiveResponse();
+                            actionBool = true;
                             if (response == null) {
                                 JOptionPane.showMessageDialog(null, "Данные утеряны или сервер недоступен, повторите попытку позже!");
                             } else {
@@ -367,7 +381,7 @@ public class MainWindow extends JFrame {
                         } catch (IOException | ClassNotFoundException | InterruptedException ex) {
                             throw new RuntimeException(ex);
                         }
-                        actionBool = true;
+                        //actionBool = true;
                         break;
                     case "remove_by_id":
                         actionBool = false;
@@ -418,6 +432,8 @@ public class MainWindow extends JFrame {
                                 JOptionPane.showMessageDialog(null, "Группы с таким id не существует!");
                             } else {
                                 EditStudyGroup update_by_id = new EditStudyGroup(communicationControl);
+                                update_by_id.addSave(true);
+
                                 saveButton = update_by_id.getSaveButton();
                                 update_by_id.setInfo(myStudyGroup);
 

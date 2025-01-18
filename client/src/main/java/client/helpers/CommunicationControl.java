@@ -21,10 +21,11 @@ public class CommunicationControl {
     public String setName(String name) {
         try {
             if (name.isEmpty()) throw new IncorrectInputException("Имя не может быть пустым");
+            return name;
         } catch (IncorrectInputException e) {
             JOptionPane.showMessageDialog(null, "Неверное имя");
+            return null;
         }
-        return name;
     }
 
 
@@ -44,8 +45,8 @@ public class CommunicationControl {
             return new Coordinates(x, y);
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Неверный формат координат");
+            return null;
         }
-        return null;
     }
 
     public Long setStudentCount(String line) {
@@ -57,9 +58,8 @@ public class CommunicationControl {
             return studentCount;
         } catch (IncorrectInputException e) {
             JOptionPane.showMessageDialog(null, "Некорректный ввод (кол-во студентов >= 0)");
+            return null;
         }
-
-        return null;
     }
 
     public Long setExpelledStudents(String line) {
@@ -71,9 +71,9 @@ public class CommunicationControl {
             return expelledStudents;
         } catch (IncorrectInputException e) {
             JOptionPane.showMessageDialog(null, "Некорректный ввод (кол-во студентов >= 0)");
+            return null;
         }
 
-        return null;
     }
 
     public Integer setTransferredStudents(String line) {
@@ -85,23 +85,27 @@ public class CommunicationControl {
             return transferredStudents;
         } catch (IncorrectInputException e) {
             JOptionPane.showMessageDialog(null, "Некорректный ввод (кол-во студентов >= 0)");
+            return null;
         }
-
-        return null;
     }
 
 
     public Person setPerson(String strName, String birthday, String strWeight, Location location) {
         try {
             String name = setName(strName);
+            if (name == null) throw new IncorrectInputException();
             LocalDateTime bDay = setBirthday(birthday);
-            double weight = setWeight(strWeight);
+            if (bDay == null) throw new IncorrectInputException();
+
+            double weight = Double.parseDouble(strWeight);
+            if (weight <= 0) throw new IncorrectInputException();
+
             return new Person(name, bDay, weight, location);
         } catch (Exception e) {
-            e.printStackTrace();
+            //e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Неверные данные Person");
+            return null;
         }
-        return null;
     }
 
     public Location setLocation(String locx, String locy, String locz){
@@ -121,27 +125,25 @@ public class CommunicationControl {
             z = Double.parseDouble(locz);
 
             return new Location(x, y, z);
-        } catch (IncorrectInputException e) {
-            e.printStackTrace();
+        } catch (IncorrectInputException | NumberFormatException e) {
+            //e.printStackTrace();
             JOptionPane.showMessageDialog(null, "Неверный формат локации");
+            return null;
         }
-        return null;
     }
 
-    private double setWeight(String line) {
-        try {
-            double weight = Long.parseLong(line);
-            if ((weight <= 0)) {
-                throw new WrongCommandArgsException();
-            }
-            return weight;
-        } catch (Exception e) {
-            System.out.println("Некорректный ввод. Попробуйте еще раз.");
-        }
-        return 0;
-    }
-
-
+//    private double setWeight(String line) {
+//        try {
+//            double weight = Double.parseDouble(line);
+//            if (weight <= 0) {
+//                throw new IncorrectInputException();
+//            }
+//            return weight;
+//        } catch (IncorrectInputException | NumberFormatException e) {
+//            JOptionPane.showMessageDialog(null, "Некорректный ввод веса");
+//            return 0;
+//        }
+//    }
 
 
     public LocalDateTime setBirthday(String birthdayStr) {
@@ -153,9 +155,10 @@ public class CommunicationControl {
             if (bd.isAfter(LocalDate.now().atStartOfDay())) throw new WrongCommandArgsException();
             return bd;
         } catch (WrongCommandArgsException e) {
-            JOptionPane.showMessageDialog(null, e.getMessage());
+            JOptionPane.showMessageDialog(null, "Неверный ввод даты");
+            return null;
         }
-        return null;
+
     }
 
     public Semester chooseSemester(String setSem) {
@@ -165,13 +168,11 @@ public class CommunicationControl {
             return semester;
         } catch (NoSuchElementException e) {
             JOptionPane.showMessageDialog(null, "Нет такого элемента");
+            return null;
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Ошибка данных");
+            return null;
         }
-        return null;
     }
-
-
-
 
 }

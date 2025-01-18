@@ -5,11 +5,9 @@ import common.exceptions.NotWithinEstablishedLimitsException;
 import common.exceptions.WrongCommandArgsException;
 import server.commands.*;
 import server.managers.*;
-import common.models.StudyGroup;
 
 
 import java.io.File;
-import java.util.Stack;
 import java.util.logging.Logger;
 
 /**
@@ -20,7 +18,6 @@ import java.util.logging.Logger;
 public class StartServer {
 
     private static final Logger logger = Logger.getLogger(StartServer.class.getName());
-    private static int port;
 
     /**
      * Запуск приложения
@@ -34,10 +31,8 @@ public class StartServer {
             if (Integer.parseInt(args[0]) < 0) throw new NotWithinEstablishedLimitsException();
             String dbHost = args[1];
             String dbPassword = args[2];
-            //String dbAddress = "jdbc:postgresql://" + dbHost + ":5432/studs";
 
-            String dbAddress = "jdbc:postgresql://localhost:5432/studs";
-
+            String dbAddress = "jdbc:postgresql://localhost:5432/dsapp";
             //String dbAddress = "jdbc:postgresql://pg:5432/studs";
 
             DatabaseConnectionManager dbConnection = new DatabaseConnectionManager(dbAddress, dbHost, dbPassword);

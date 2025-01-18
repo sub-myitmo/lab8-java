@@ -1,5 +1,6 @@
 package server.commands;
 
+import common.actions.Console;
 import common.actions.User;
 import common.models.StudyGroup;
 import server.managers.CollectionManager;
@@ -25,30 +26,31 @@ public class SendNewStack extends Command {
         Stack<StudyGroup> collection = null;
         try {
             collection = collectionManager.getStackCollection();
+            Console.println(collection.size()+"");
         } catch (Exception e) {
             e.printStackTrace();
         }
         ArrayList<Stack<StudyGroup>> listOfStacks = new ArrayList<>();
         assert collection != null;
         int siz = collection.size();
-        groupsCount = siz / 50;
-        int count = 0;
-        if (groupsCount > 0) {
-            for (int i = 0; i < groupsCount; i++) {
-                Stack<StudyGroup> newStudyGroups = new Stack<>();
-                for (int j = 50 * count; j < 50 + 50 * count; j++) {
-                    newStudyGroups.add(collection.get(j));
-                }
-                listOfStacks.add(newStudyGroups);
-                count++;
-            }
-        }
-        Stack<StudyGroup> ostatStudyGroups = new Stack<>();
-        for (int k = groupsCount * 50; k < collection.size(); k++) {
-            ostatStudyGroups.add(collection.get(k));
+        int counter = 0;
+        int dataLength = 0;
 
+        Stack<StudyGroup> newStudyGroups = new Stack<>();
+        while (counter < siz) {
+            newStudyGroups.add(collection.get(counter));
+
+            dataLength += collection.get(counter).toString().length();
+            if (dataLength >= 8192) {
+                Console.println("i=" + counter + ", dataLength=" + dataLength);
+                dataLength = 0;
+                listOfStacks.add(newStudyGroups);
+                newStudyGroups = new Stack<>();
+            }
+            counter++;
         }
-        listOfStacks.add(ostatStudyGroups);
+        if (!newStudyGroups.isEmpty()) listOfStacks.add(newStudyGroups);
+
 
         return listOfStacks;
 

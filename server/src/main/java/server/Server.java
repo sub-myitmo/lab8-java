@@ -34,14 +34,12 @@ public class Server {
     public void connection() {
         try {
             serverSocket = new DatagramSocket(port);
-            logger.info("Сервер запущен.");
+            logger.info("Server starts");
 
             while (true){
-                byte[] receiveData = new byte[4096];
+                byte[] receiveData = new byte[8192];
                 DatagramPacket receivePacket = new DatagramPacket(receiveData, receiveData.length);
-                logger.info("Ожидание пакета от клиента...");
                 serverSocket.receive(receivePacket);
-                logger.info("Пакет был принят от клиента");
 
                 semaphore.acquire();
                 cachedThreadPool.submit(new ConnectionHandler(receivePacket, commandManager, this));
@@ -53,9 +51,9 @@ public class Server {
             Console.printerror("Произошла ошибка при получении разрешения на новое соединение!");
             logger.severe("Произошла ошибка при получении разрешения на новое соединение!");
         } finally {
-
+            cachedThreadPool.shutdown();
             try {
-                cachedThreadPool.awaitTermination(5, TimeUnit.NANOSECONDS);
+                cachedThreadPool.awaitTermination(1, TimeUnit.MILLISECONDS);
                 Console.println("Работа сервера завершена");
                 logger.info("Работа сервера завершена");
             } catch (InterruptedException e) {
@@ -67,7 +65,6 @@ public class Server {
 
     public void releaseConnection() {
         semaphore.release();
-        logger.info("Разрыв соединения с клиентом из-за временного бездействия");
     }
 
 

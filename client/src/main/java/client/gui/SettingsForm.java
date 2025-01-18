@@ -27,25 +27,25 @@ public class SettingsForm extends JFrame {
 
         JRadioButton englishButton = new JRadioButton("English");
         JRadioButton russianButton = new JRadioButton("Русский");
-        JRadioButton deutschButton = new JRadioButton("Deutsch");
-        JRadioButton swedishButton = new JRadioButton("Svenska");
+        //JRadioButton deutschButton = new JRadioButton("Deutsch");
+        //JRadioButton swedishButton = new JRadioButton("Svenska");
 
         languageGroup.add(englishButton);
         languageGroup.add(russianButton);
-        languageGroup.add(deutschButton);
-        languageGroup.add(swedishButton);
+        //languageGroup.add(deutschButton);
+        //languageGroup.add(swedishButton);
 
         englishButton.setSelected(true);
 
         englishButton.addActionListener(e -> setLanguage(new Locale("en", "IE")));
         russianButton.addActionListener(e -> setLanguage(new Locale("ru", "RU")));
-        deutschButton.addActionListener(e -> setLanguage(new Locale("de", "DE")));
-        swedishButton.addActionListener(e -> setLanguage(new Locale("sv", "SE")));
+        //deutschButton.addActionListener(e -> setLanguage(new Locale("de", "DE")));
+        //swedishButton.addActionListener(e -> setLanguage(new Locale("sv", "SE")));
 
         languagePanel.add(englishButton);
         languagePanel.add(russianButton);
-        languagePanel.add(deutschButton);
-        languagePanel.add(swedishButton);
+        //languagePanel.add(deutschButton);
+        //languagePanel.add(swedishButton);
 
         getContentPane().add(languagePanel, BorderLayout.NORTH);
 

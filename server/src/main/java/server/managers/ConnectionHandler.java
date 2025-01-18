@@ -33,8 +33,8 @@ public class ConnectionHandler implements Runnable {
 
     @Override
     public void run() {
+        //logger.info("Выполняется в потоке cachedPool: " + Thread.currentThread());
         try {
-            // Чтение данных из пакета
             byte[] receiveData = receivePacket.getData();
             ByteArrayInputStream bis = new ByteArrayInputStream(receiveData);
             ObjectInputStream ois = new ObjectInputStream(bis);
@@ -44,24 +44,25 @@ public class ConnectionHandler implements Runnable {
             Future<Response> futureResponse = cachedPool1.submit(new HandleRequestTask(request, commandManager));
 
             cachedPool2.submit(() -> {
+                //logger.info("Выполняется в потоке cachedPool2: " + Thread.currentThread());
                 try {
                     DatagramSocket socket = new DatagramSocket();
                     ByteArrayOutputStream bos = new ByteArrayOutputStream();
                     ObjectOutputStream oos = new ObjectOutputStream(bos);
 
-                    Response response =  futureResponse.get();
-
+                    Response response = futureResponse.get();
 
                     if (response.getIsGoodResponse() == ResponseCode.PEAK_SIZE) {
                         ArrayList<Stack<StudyGroup>> ara = (ArrayList<Stack<StudyGroup>>) response.getResponseObject();
+
                         Response count = new Response(ara.size(), ResponseCode.PEAK_SIZE);
                         oos.writeObject(count);
                         oos.flush();
                         byte[] sendDataC = bos.toByteArray();
-                        System.out.println(sendDataC.length);
+
+
                         DatagramPacket sendPacketC = new DatagramPacket(sendDataC, sendDataC.length, receivePacket.getAddress(), receivePacket.getPort());
                         socket.send(sendPacketC);
-                        logger.info("Пакет был отправлен клиенту!");
 
                         for (int i = 0; i < ara.size(); i++) {
                             try (ByteArrayOutputStream tempBos = new ByteArrayOutputStream();
@@ -70,21 +71,25 @@ public class ConnectionHandler implements Runnable {
                                 tempOos.writeObject(temp);
                                 tempOos.flush();
                                 byte[] sendData = tempBos.toByteArray();
+                                logger.info("length: " + sendData.length);
+
                                 DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, receivePacket.getAddress(), receivePacket.getPort());
                                 socket.send(sendPacket);
 
-                                logger.info("Пакет был отправлен клиенту!");
+                                if (ara.size() > 1)
+                                    logger.info("Пакет был отправлен клиенту! sendNewStack[" + (i + 1) + "/" + ara.size() + "], size = " + ara.get(i).size());
                             } catch (IOException e) {
                                 logger.severe("Ошибка при отправке пакета клиенту: " + e);
                             }
                         }
-                    }else {
+                    } else {
                         oos.writeObject(response);
                         oos.flush();
                         byte[] sendData = bos.toByteArray();
                         DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, receivePacket.getAddress(), receivePacket.getPort());
                         socket.send(sendPacket);
-                        logger.info("Пакет был отправлен клиенту!");
+                        logger.info("addres=" + receivePacket.getAddress() + ":" + receivePacket.getPort());
+                        logger.info("Пакет был отправлен клиенту! " + response.getResponse());
                     }
 
 //                    oos.writeObject(futureResponse.get());
@@ -95,9 +100,9 @@ public class ConnectionHandler implements Runnable {
 //                    socket.send(sendPacket);
 //                    logger.info("Пакет был отправлен клиенту!");
 
-                    } catch (IOException | InterruptedException | ExecutionException e) {
-                        e.printStackTrace();
-                    }
+                } catch (IOException | InterruptedException | ExecutionException e) {
+                    e.printStackTrace();
+                }
 
             });
 
@@ -106,15 +111,19 @@ public class ConnectionHandler implements Runnable {
             e.printStackTrace();
         } finally {
             // Завершение работы пулов потоков
-            //cachedPool1.shutdown();
-            //try {
-                // Дождаться завершения всех задач
-                //cachedPool1.awaitTermination(5, TimeUnit.NANOSECONDS);
-                Console.println("Клиент отключен от сервера");
-                logger.info("Клиент отключен от сервера");
-//            } catch (InterruptedException e) {
-//                logger.severe("Ошибка c закрытием потоков");
-//            }
+            cachedPool1.shutdown();
+            cachedPool2.shutdown();
+            // Дождаться завершения всех задач
+            try {
+                cachedPool1.awaitTermination(1, TimeUnit.MILLISECONDS);
+                cachedPool2.awaitTermination(1, TimeUnit.MILLISECONDS);
+//                logger.info((cachedPool1.awaitTermination(1, TimeUnit.MILLISECONDS) && cachedPool2.awaitTermination(1, TimeUnit.MILLISECONDS)) + "");
+//                logger.info(Thread.activeCount()+"");
+
+            } catch (InterruptedException e) {
+                logger.severe("Ошибка c закрытием потоков");
+            }
+
             server.releaseConnection();
         }
     }

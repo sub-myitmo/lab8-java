@@ -37,8 +37,6 @@ public class GroupMask implements Serializable {
     }
 
 
-
-
     /**
      * Получить имя
      *
@@ -101,5 +99,10 @@ public class GroupMask implements Serializable {
      */
     public Person getGroupAdmin() {
         return groupAdmin;
+    }
+
+    @Override
+    public String toString() {
+        return "name: " + name + ", coordinates: " + coordinates + ", studentsCount: " + studentsCount + ", expelledStudents: " + expelledStudents + ", transferredStudents: " + transferredStudents + ", semesterEnum: " + semesterEnum + ", groupAdmin: " + groupAdmin;
     }
 }

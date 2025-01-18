@@ -49,13 +49,13 @@ public class LoginForm extends JFrame {
 
         englishButton.addActionListener(e -> setLanguage(new Locale("en", "IE")));
         russianButton.addActionListener(e -> setLanguage(new Locale("ru", "RU")));
-        deutschButton.addActionListener(e -> setLanguage(new Locale("de", "DE")));
-        swedishButton.addActionListener(e -> setLanguage(new Locale("sv", "SE")));
+        //deutschButton.addActionListener(e -> setLanguage(new Locale("de", "DE")));
+        //swedishButton.addActionListener(e -> setLanguage(new Locale("sv", "SE")));
 
         languagePanel.add(englishButton);
         languagePanel.add(russianButton);
-        languagePanel.add(deutschButton);
-        languagePanel.add(swedishButton);
+        //languagePanel.add(deutschButton);
+        //languagePanel.add(swedishButton);
 
         getContentPane().add(languagePanel, BorderLayout.NORTH);
 
